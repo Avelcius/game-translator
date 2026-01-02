@@ -3,18 +3,20 @@ import time
 import re
 import subprocess
 import sys
-import google.genai as genai
+from google import genai
 
-# Глобальная переменная для хранения модели, чтобы избежать повторной инициализации
-model = None
+# Глобальная переменная для хранения клиента, чтобы избежать повторной инициализации
+client = None
 
 def install_dependencies():
     """Устанавливает зависимости из requirements.txt, если они еще не установлены."""
     try:
-        import google.genai
+        # Проверяем официальную библиотеку google-genai (рекомендуемый пакет)
+        from google import genai as _genai
     except ImportError:
         print("Установка необходимых библиотек...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+        # Попробуем установить официальную библиотеку напрямую
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "google-genai"])
         print("Библиотеки успешно установлены.")
 
 def get_source_folder():
@@ -71,30 +73,50 @@ def process_files(source_dir, output_dir):
 
 def configure_gemini():
     """Запрашивает API ключ и настраивает модель Gemini."""
-    global model
+    global client
     try:
-        api_key = input("Пожалуйста, введите ваш Google AI API ключ: ")
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-pro')
-        print("Модель Gemini успешно настроена.")
+        api_key = input("Пожалуйста, введите ваш Google AI API ключ (или нажмите Enter для использования переменной окружения): ")
+
+        # Создаём клиент. Предпочтительно использовать переменную окружения GEMINI_API_KEY,
+        # но разрешаем пользователю ввести ключ вручную для удобства.
+        if api_key and api_key.strip():
+            client = genai.Client(api_key=api_key.strip())
+        else:
+            client = genai.Client()
+
+        # Простая проверка: запрос версии моделей (легковесный способ проверить подключение)
+        try:
+            _ = client.models.list()
+        except Exception:
+            # Не фатальная ошибка — клиент всё равно создан, но мы информируем пользователя
+            print("Клиент создан, но не удалось получить список моделей (проверьте ключ и сетевое подключение).")
+
+        print("Клиент Gemini успешно настроен.")
+
     except Exception as e:
-        print(f"Ошибка при настройке Gemini: {e}")
-        print("Пожалуйста, убедитесь, что у вас правильный API ключ и установлены все зависимости.")
+        print(f"Ошибка при настройке клиента Gemini: {e}")
+        print("Пожалуйста, убедитесь, что установлен пакет 'google-genai' и вы используете верный Python-интерпретатор.")
+        print("Если конфликтует пакет 'google', удалите его: pip uninstall google")
         sys.exit(1)
 
 def translate_text(text):
     """Отправляет текст в Gemini API и возвращает перевод, соблюдая RPM."""
-    global model
-    if not model:
-        print("Ошибка: Модель Gemini не была инициализирована.")
+    global client
+    if not client:
+        print("Ошибка: клиент Gemini не был инициализирован.")
         return text # Возвращаем оригинал в случае ошибки
 
     try:
         # Пауза для соблюдения лимита 60 запросов в минуту
-        time.sleep(1.5)
+        time.sleep(4)
 
         prompt = f"Translate the following English text to Russian. Preserve any special characters and formatting like '\\.' or '\\!'. Do not add any extra text, comments, or quotation marks around the translation. Original text: '{text}'"
-        response = model.generate_content(prompt)
+
+        # Вызов через официальный клиент
+        response = client.models.generate_content(
+            model='gemini-3-flash-preview',
+            contents=prompt,
+        )
 
         translated = response.text.strip()
         print(f"  Переведено: '{text}' -> '{translated}'")
