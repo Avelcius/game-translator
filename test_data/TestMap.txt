@@ -1,0 +1,7 @@
+◆Comment：Это тестовый файл.
+◆Show Text： ：0
+Hello, world!
+◆Comment：Еще один комментарий.
+◆Show Text： ：0
+This is a test.
+◆Comment：Конец файла.
