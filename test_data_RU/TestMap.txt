@@ -1,7 +1,20 @@
-◆Comment：Это тестовый файл.
-◆Show Text： ：0
-Привет, мир!
-◆Comment：Еще один комментарий.
-◆Show Text： ：0
-Это тест.
-◆Comment：Конец файла.
+CommonEvent 6
+Name = "Courtesan"
+
+  Page 0
+    Comment(["<always update>"])
+    Script(["$game_variables[3216][17] = 2"])
+    SetMoveRoute([0, "RPG::MoveRoute(@repeat=false, @skippable=false, @wait=true, @list=[\"RPG::MoveCommand(@code=14, @parameters=[0, 0])\", \"RPG::MoveCommand(@code=25, @parameters=[])\", \"RPG::MoveCommand(@code=0, @parameters=[])\"])"])
+    Unnamed(["RPG::MoveCommand(@code=14, @parameters=[0, 0])"])
+    Unnamed(["RPG::MoveCommand(@code=25, @parameters=[])"])
+    ControlVariables([2097, 2097, 0, 0, 1116])
+    ControlSwitches([2412, 2412, 0])
+    ControlVariables([2051, 2051, 0, 0, 1])
+    ShowPicture([1, "RND", 0, 0, 0, 0, 100, 100, 255, 0])
+    ShowTextAttributes(["", 0, 2, 2])
+    ShowText(["Goblin Courtesan:"])
+    ShowText(["W-\\.WHO ARE YA!?\\.\\. I'LL KILL YA!"])
+    CallCommonEvent([559])
+    ControlSwitches([2412, 2412, 1])
+    ControlSwitches([884, 884, 0])
+    Empty([])
